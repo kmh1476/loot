@@ -3,82 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>프로스트헤이븐: 노획물 덱</title>
+    <title>프로스트헤이븐: 노획 대시보드</title>
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/loot/fh-loot-bw-icon.png">
     <style>
-        :root { --bg-solid: #020617; --bg-overlay: rgba(2, 6, 23, 0.70); --panel-bg: rgba(15, 23, 42, 0.98); --accent: #38bdf8; --text: #e2e8f0; --border: rgba(56, 189, 248, 0.3); }
-        body { font-family: 'Pretendard', sans-serif; background: var(--bg-solid); color: var(--text); margin: 0; padding: 25px; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; position: relative; background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/game-box/fh-game-box-bottom-longside.png'); background-size: cover; background-position: center; background-attachment: fixed; }
+        :root { --bg-solid: #020617; --bg-overlay: rgba(2, 6, 23, 0.65); --panel-bg: rgba(15, 23, 42, 0.98); --accent: #38bdf8; --text: #f1f5f9; --border: rgba(56, 189, 248, 0.3); }
+        
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg-solid); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/game-box/fh-game-box-bottom-longside.png'); background-size: cover; background-position: center; background-attachment: fixed; }
+        
         #snow-canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 0; }
-        .main-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 25px; z-index: 1; }
-        header { text-align: center; margin-bottom: 5px; }
-        .logo { width: 350px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); opacity: 0.9; }
-        #setup-area { background: var(--panel-bg); padding: 40px; border-radius: 35px; border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
-        .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 35px; }
-        #play-area { display: none; grid-template-columns: 1.1fr 1.4fr; gap: 40px; }
-        .display-panel { background: var(--panel-bg); padding: 50px; border-radius: 40px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 25px; box-shadow: 0 40px 80px rgba(0,0,0,1); }
-        .loot-card { width: 280px; height: 390px; border-radius: 25px; box-shadow: 0 30px 70px rgba(0,0,0,1); background: #0f172a; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .main-wrapper { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 20px; z-index: 1; }
+        header { text-align: center; padding: 10px 0; }
+        .logo { width: 400px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); }
+
+        /* 세팅 화면 */
+        #setup-area { background: var(--panel-bg); padding: 25px; border-radius: 30px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .setup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .input-group { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .input-row { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 플레이 화면 레이아웃 */
+        #play-area { display: none; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 1000px) { #play-area { grid-template-columns: 1.1fr 1.4fr; } }
+
+        .display-panel { background: var(--panel-bg); padding: 30px 15px; border-radius: 30px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
+        .loot-card { width: 220px; height: 306px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,1); background: #0f172a; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         .loot-card img { width: 100%; height: 100%; object-fit: contain; }
-        .log-panel { display: flex; flex-direction: column; gap: 20px; }
-        .player-box { position: relative; overflow: hidden; padding: 30px 30px 30px 130px; background: rgba(15, 23, 42, 0.9); border-radius: 30px; border: 1px solid var(--border); min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
-        .hero-portrait { position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 150px; height: 150px; object-fit: cover; mask-image: linear-gradient(to right, black 40%, transparent 95%); -webkit-mask-image: linear-gradient(to right, black 40%, transparent 95%); opacity: 0.85; z-index: 1; }
-        .name-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; z-index: 2; }
-        .hero-icon-wrapper { width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        .hero-icon { width: 36px; height: 36px; }
-        .name-tag { font-weight: 900; color: white; font-size: 28px; text-shadow: 0 4px 8px black; letter-spacing: -1.5px; }
-        .summary-container { display: flex; flex-wrap: wrap; gap: 12px; z-index: 2; }
-        .icon-wrapper { background: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .setup-icon { width: 26px; height: 26px; }
-        .input-group { background: rgba(0,0,0,0.6); padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
-        input[type="number"] { width: 60px; background: #020617; border: 2px solid var(--accent); color: white; border-radius: 12px; padding: 10px; text-align: center; font-weight: 900; font-size: 20px; }
-        input[type="checkbox"] { width: 30px; height: 30px; accent-color: var(--accent); cursor: pointer; }
-        .btn { width: 100%; padding: 25px; border: none; border-radius: 25px; font-weight: 800; cursor: pointer; font-size: 24px; transition: 0.2s; }
-        .btn-draw { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; box-shadow: 0 8px 0 #0369a1; }
-        .assign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; visibility: hidden; margin-top: 25px; }
-        .btn-name { background: #1e293b; color: white; font-size: 20px; padding: 22px 5px; border-radius: 18px; box-shadow: 0 7px 0 #0f172a; font-weight: 900; }
-        .log-item { background: white; color: #020617; padding: 8px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 900; }
-        .log-icon { width: 22px; height: 22px; }
-        .btn-restart { background: #0f172a; color: #64748b; border: 1px solid #1e293b; font-size: 16px; font-weight: 800; padding: 15px 30px; border-radius: 16px; margin-top: 25px; align-self: flex-end; box-shadow: 0 6px 0 #020617; }
-    /* --- 모바일 가독성 개선 (추가/수정) --- */
-@media (max-width: 800px) {
-    body { padding: 10px; } /* 전체 여백 축소 */
-    
-    .logo { width: 200px; } /* 로고 크기 적당히 */
 
-    /* 1. 세팅 화면: 2열로 촘촘하게 */
-    .setup-grid { 
-        grid-template-columns: 1fr 1fr; 
-        gap: 10px; 
-    }
-    .input-group { padding: 12px; }
-    .input-group span { font-size: 15px !important; }
+        /* 로그 패널 모바일 최적화 */
+        .log-panel { display: flex; flex-direction: column; gap: 15px; }
+        .player-box { position: relative; overflow: hidden; padding: 20px 15px 20px 90px; background: rgba(15, 23, 42, 0.95); border-radius: 25px; border: 1px solid var(--border); min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+        .hero-portrait { position: absolute; left: -10px; top: 50%; transform: translateY(-50%); width: 110px; height: 110px; object-fit: cover; opacity: 0.7; mask-image: linear-gradient(to right, black 40%, transparent 95%); -webkit-mask-image: linear-gradient(to right, black 40%, transparent 95%); }
+        .name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; z-index: 2; }
+        .name-tag { font-weight: 900; color: white; font-size: 22px; text-shadow: 0 2px 4px black; }
+        .summary-container { display: flex; flex-wrap: wrap; gap: 8px; z-index: 2; }
 
-    /* 2. 플레이 화면: 위(카드) / 아래(로그) 수직 배치 */
-    #play-area { 
-        grid-template-columns: 1fr; 
-        gap: 20px; 
-    }
-
-    /* 3. 카드 디스플레이: 크기 유지하며 중앙 정렬 */
-    .display-panel { padding: 25px 15px; }
-    .loot-card { width: 240px; height: 334px; } /* 살짝 축소해서 한눈에 */
-
-    /* 4. 플레이어 로그 박스: 가독성 핵심 */
-    .player-box { 
-        padding: 20px 20px 20px 100px; /* 왼쪽 여백 줄임 */
-        min-height: 100px;
-    }
-    .hero-portrait { width: 110px; height: 110px; left: -10px; }
-    .name-tag { font-size: 22px; }
-    .hero-icon-wrapper { width: 32px; height: 32px; }
-    .hero-icon { width: 24px; height: 24px; }
-
-    /* 5. 버튼: 엄지손가락으로 누르기 편하게 */
-    .btn { padding: 18px; font-size: 20px; }
-    .btn-name { font-size: 18px; padding: 15px 5px; }
-    
-    .summary-container { gap: 6px; }
-    .log-item { font-size: 14px; padding: 6px 10px; }
-}
+        .icon-wrapper { background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .setup-icon { width: 22px; height: 22px; }
+        
+        /* 버튼 및 입력창 모바일 최적화 */
+        input[type="number"] { width: 50px; background: #020617; border: 2px solid var(--accent); color: white; border-radius: 10px; padding: 8px; text-align: center; font-weight: 900; font-size: 18px; }
+        input[type="checkbox"] { width: 28px; height: 28px; accent-color: var(--accent); }
+        
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; font-size: 20px; transition: 0.2s; }
+        .btn-draw { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; box-shadow: 0 6px 0 #0369a1; }
+        .assign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; visibility: hidden; margin-top: 15px; }
+        .btn-name { background: #1e293b; color: white; font-size: 17px; padding: 15px 5px; border-radius: 15px; box-shadow: 0 5px 0 #0f172a; font-weight: 900; }
+        
+        .log-item { background: white; color: #020617; padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 900; }
+        .log-icon { width: 18px; height: 18px; }
+        .btn-restart { background: #0f172a; color: #64748b; border: 1px solid #1e293b; font-size: 14px; font-weight: 800; padding: 12px 20px; border-radius: 14px; align-self: flex-end; }
     </style>
 </head>
 <body>
@@ -86,28 +59,29 @@
 <div class="main-wrapper">
     <header><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/logos/fh-frosthaven-logo.png" class="logo"></header>
     <div id="setup-area">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid var(--border); padding-bottom:20px;">
-            <span style="font-size:24px; font-weight:900; color:var(--accent);">노획물 목록</span>
-            <button onclick="resetAllToZero()" style="background:#0f172a; color:#94a3b8; border:1px solid #1e293b; padding:12px 25px; border-radius:14px; cursor:pointer; font-weight:800;">전체 리셋</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <span style="font-size:20px; font-weight:900; color:var(--accent);">원정대 노획 세팅</span>
+            <button onclick="resetAllToZero()" style="background:#1e293b; color:#94a3b8; border:none; padding:8px 15px; border-radius:10px; font-size:13px; font-weight:800;">리셋</button>
         </div>
         <div class="setup-grid" id="setup-inputs"></div>
         <button class="btn btn-draw" onclick="startGame()">게임 시작 (START)</button>
     </div>
     <div id="play-area">
-        <div class="display-panel"><div class="loot-card" id="current-card"></div><p id="deck-info" style="font-weight:900; color:#64748b; margin:0; font-size:24px;">남은 카드: 0</p><div style="width:100%; max-width:500px;"><button class="btn btn-draw" id="draw-btn" onclick="drawCard()">카드 드로우</button><div class="assign-grid" id="assign-area"><button class="btn btn-name" onclick="assignTo('김명흠')">명흠</button><button class="btn btn-name" onclick="assignTo('배현우')">현우</button><button class="btn btn-name" onclick="assignTo('정태영')">태영</button></div></div></div>
+        <div class="display-panel"><div class="loot-card" id="current-card"></div><p id="deck-info" style="font-weight:900; color:#64748b; margin:0; font-size:20px;">남은 카드: 0</p><div style="width:100%; max-width:400px;"><button class="btn btn-draw" id="draw-btn" onclick="drawCard()">카드 드로우</button><div class="assign-grid" id="assign-area"><button class="btn btn-name" onclick="assignTo('김명흠')">명흠</button><button class="btn btn-name" onclick="assignTo('배현우')">현우</button><button class="btn btn-name" onclick="assignTo('정태영')">태영</button></div></div></div>
         <div class="log-panel">
-            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-geminate.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-geminate-bw-icon.png" class="hero-icon"></div><span class="name-tag">김명흠</span></div><div id="log-김명흠" class="summary-container"></div></div>
-            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-banner-spear.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-banner-spear-bw-icon.png" class="hero-icon"></div><span class="name-tag">배현우</span></div><div id="log-배현우" class="summary-container"></div></div>
-            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-frozen-fist.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-frozen-fist-bw-icon.png" class="hero-icon"></div><span class="name-tag">정태영</span></div><div id="log-정태영" class="summary-container"></div></div>
-            <button class="btn btn-restart" onclick="location.reload()">다시 세팅하기 (Reset)</button>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-geminate.png" class="hero-portrait"><div class="name-row"><span class="name-tag">김명흠</span></div><div id="log-김명흠" class="summary-container"></div></div>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-banner-spear.png" class="hero-portrait"><div class="name-row"><span class="name-tag">배현우</span></div><div id="log-배현우" class="summary-container"></div></div>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-frozen-fist.png" class="hero-portrait"><div class="name-row"><span class="name-tag">정태영</span></div><div id="log-정태영" class="summary-container"></div></div>
+            <button class="btn btn-restart" onclick="location.reload()">처음으로</button>
         </div>
     </div>
 </div>
 <script>
+    /* ... (기존 JavaScript 로직 동일하지만 initInputs만 모바일 최적화 레이아웃으로 변경) ... */
     const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d'); let flakes = [];
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
-    function createFlakes() { flakes = []; for(let i=0; i<180; i++) flakes.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*3+1, d: Math.random()*2+1, a: Math.random()*0.6+0.2 }); }
+    function createFlakes() { flakes = []; for(let i=0; i<150; i++) flakes.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*3+1, d: Math.random()*2+1, a: Math.random()*0.5+0.2 }); }
     function drawFlakes() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); flakes.forEach(f => { ctx.fillStyle = `rgba(255, 255, 255, ${f.a})`; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2, true); }); ctx.fill(); moveFlakes(); }
     function moveFlakes() { flakes.forEach(f => { f.y += f.d; f.x += Math.sin(f.y/80)*2 + 1; if(f.y > canvas.height) { f.y = -20; f.x = Math.random()*canvas.width; } if(f.x > canvas.width) f.x = 0; }); }
     setInterval(drawFlakes, 30); createFlakes();
@@ -140,7 +114,7 @@
             const conf = itemConfig[id];
             const iconHtml = conf.isCheck ? `<div class="icon-wrapper" style="background:transparent; border:1px dashed rgba(255,255,255,0.1);"></div>` : `<div class="icon-wrapper"><img src="${conf.icon}" class="setup-icon"></div>`;
             let inputHtml = conf.isCheck ? `<input type="checkbox" id="in-${id}">` : `<input type="number" id="in-${id}" value="0" min="0" max="${conf.max}" oninput="if(this.value > ${conf.max}) this.value = ${conf.max}; if(this.value < 0) this.value = 0;">`;
-            setupInputs.innerHTML += `<div class="input-group"><div style="display:flex; align-items:center; gap:10px;">${iconHtml}<span style="font-weight:600; font-size:18px;">${conf.label}</span></div>${inputHtml}</div>`;
+            setupInputs.innerHTML += `<div class="input-group">${iconHtml}<span style="font-weight:700; font-size:15px; color:#94a3b8;">${conf.label}</span>${inputHtml}</div>`;
         });
     }
 
@@ -167,13 +141,11 @@
         document.getElementById('setup-area').style.display = 'none'; document.getElementById('play-area').style.display = 'grid';
         showCard(backImg); updateUI();
     }
-
     function showCard(src) { document.getElementById('current-card').innerHTML = `<img src="${src}">`; }
     function drawCard() {
         if (masterDeck.length === 0) return alert("덱이 비었습니다!");
         currentResult = masterDeck.pop(); showCard(baseUrl + currentResult.img);
-        document.getElementById('assign-area').style.visibility = 'visible'; document.getElementById('draw-btn').disabled = true;
-        updateUI();
+        document.getElementById('assign-area').style.visibility = 'visible'; document.getElementById('draw-btn').disabled = true; updateUI();
     }
     function assignTo(name) {
         if(!currentResult) return; const { type, amount } = currentResult; logs[name][type] = (logs[name][type] || 0) + amount;
