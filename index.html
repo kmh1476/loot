@@ -4,193 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>프로스트헤이븐: 노획물 덱</title>
-    
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/loot/fh-loot-bw-icon.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <style>
-        :root { 
-            /* 🌑 극한의 남색 & 블랙 조화: 구버전의 느낌을 살림 */
-            --bg-solid: #020617; /* 아주 깊은 심해 남색 */
-            --bg-overlay: rgba(2, 6, 23, 0.75); /* 배경 이미지를 거의 다 덮어버리는 농도 */
-            --panel-bg: rgba(15, 23, 42, 0.98); /* 패널은 거의 단색처럼 보임 */
-            --accent: #38bdf8; --text: #e2e8f0; --gold: #fbbf24;
-            --border: rgba(56, 189, 248, 0.3);
-        }
-        
-        body { 
-            font-family: 'Pretendard', sans-serif; 
-            background: var(--bg-solid); 
-            color: var(--text); 
-            margin: 0; padding: 25px; display: flex; justify-content: center; min-height: 100vh;
-            overflow-x: hidden; position: relative;
-            /* 🖼️ 배경 원화를 92% 농도의 남색으로 덮어버림 */
-            background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), 
-                              url('https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/game-box/fh-game-box-bottom-longside.png');
-            background-size: cover; background-position: center; background-attachment: fixed;
-        }
-
+        :root { --bg-solid: #020617; --bg-overlay: rgba(2, 6, 23, 0.70); --panel-bg: rgba(15, 23, 42, 0.98); --accent: #38bdf8; --text: #e2e8f0; --border: rgba(56, 189, 248, 0.3); }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg-solid); color: var(--text); margin: 0; padding: 25px; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; position: relative; background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/game-box/fh-game-box-bottom-longside.png'); background-size: cover; background-position: center; background-attachment: fixed; }
         #snow-canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 0; }
-
         .main-wrapper { width: 100%; max-width: 1400px; display: flex; flex-direction: column; gap: 25px; z-index: 1; }
         header { text-align: center; margin-bottom: 5px; }
-        .logo { width: 320px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); opacity: 0.9; }
-
-        /* 설정창 */
-        #setup-area { 
-            background: var(--panel-bg); padding: 40px; border-radius: 35px; 
-            border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-        }
+        .logo { width: 350px; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3)); opacity: 0.9; }
+        #setup-area { background: var(--panel-bg); padding: 40px; border-radius: 35px; border: 1px solid var(--border); box-shadow: 0 30px 60px rgba(0,0,0,0.9); }
         .setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 35px; }
-
-        /* 플레이 영역 */
         #play-area { display: none; grid-template-columns: 1.1fr 1.4fr; gap: 40px; }
-
-        /* 카드 영역 */
-        .display-panel { 
-            background: var(--panel-bg); padding: 50px; border-radius: 40px; 
-            border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 25px;
-            box-shadow: 0 40px 80px rgba(0,0,0,1);
-        }
-        .loot-card { 
-            width: 280px; height: 390px; border-radius: 25px; 
-            box-shadow: 0 30px 70px rgba(0,0,0,1); background: #0f172a; overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .display-panel { background: var(--panel-bg); padding: 50px; border-radius: 40px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 25px; box-shadow: 0 40px 80px rgba(0,0,0,1); }
+        .loot-card { width: 280px; height: 390px; border-radius: 25px; box-shadow: 0 30px 70px rgba(0,0,0,1); background: #0f172a; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         .loot-card img { width: 100%; height: 100%; object-fit: contain; }
-
-        /* 캐릭터 대시보드 */
         .log-panel { display: flex; flex-direction: column; gap: 20px; }
-        .player-box { 
-            position: relative; overflow: hidden; padding: 30px 30px 30px 130px; 
-            background: rgba(15, 23, 42, 0.9); border-radius: 30px; border: 1px solid var(--border);
-            min-height: 140px; display: flex; flex-direction: column; justify-content: center;
-        }
-        .hero-portrait { 
-            position: absolute; left: -15px; top: 50%; transform: translateY(-50%);
-            width: 150px; height: 150px; object-fit: cover; 
-            mask-image: linear-gradient(to right, black 40%, transparent 95%);
-            -webkit-mask-image: linear-gradient(to right, black 40%, transparent 95%);
-            opacity: 0.85; z-index: 1;
-        }
+        .player-box { position: relative; overflow: hidden; padding: 30px 30px 30px 130px; background: rgba(15, 23, 42, 0.9); border-radius: 30px; border: 1px solid var(--border); min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+        .hero-portrait { position: absolute; left: -15px; top: 50%; transform: translateY(-50%); width: 150px; height: 150px; object-fit: cover; mask-image: linear-gradient(to right, black 40%, transparent 95%); -webkit-mask-image: linear-gradient(to right, black 40%, transparent 95%); opacity: 0.85; z-index: 1; }
         .name-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; z-index: 2; }
-        .hero-icon-wrapper { 
-            width: 48px; height: 48px; background: white; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
+        .hero-icon-wrapper { width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
         .hero-icon { width: 36px; height: 36px; }
         .name-tag { font-weight: 900; color: white; font-size: 28px; text-shadow: 0 4px 8px black; letter-spacing: -1.5px; }
         .summary-container { display: flex; flex-wrap: wrap; gap: 12px; z-index: 2; }
-
-        /* 버튼 및 입력 */
-        .icon-wrapper { background: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .icon-wrapper { background: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .setup-icon { width: 26px; height: 26px; }
         .input-group { background: rgba(0,0,0,0.6); padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
-        input { width: 60px; background: #020617; border: 2px solid var(--accent); color: white; border-radius: 12px; padding: 10px; text-align: center; font-weight: 900; font-size: 20px; }
-        
+        input[type="number"] { width: 60px; background: #020617; border: 2px solid var(--accent); color: white; border-radius: 12px; padding: 10px; text-align: center; font-weight: 900; font-size: 20px; }
+        input[type="checkbox"] { width: 30px; height: 30px; accent-color: var(--accent); cursor: pointer; }
         .btn { width: 100%; padding: 25px; border: none; border-radius: 25px; font-weight: 800; cursor: pointer; font-size: 24px; transition: 0.2s; }
         .btn-draw { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; box-shadow: 0 8px 0 #0369a1; }
-        .btn-draw:active { transform: translateY(4px); box-shadow: 0 4px 0 #0369a1; }
-        
         .assign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; visibility: hidden; margin-top: 25px; }
         .btn-name { background: #1e293b; color: white; font-size: 20px; padding: 22px 5px; border-radius: 18px; box-shadow: 0 7px 0 #0f172a; font-weight: 900; }
-        .btn-name:hover { background: var(--accent); color: #020617; }
-
         .log-item { background: white; color: #020617; padding: 8px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 900; }
         .log-icon { width: 22px; height: 22px; }
-
-        .btn-restart { 
-            background: #0f172a; color: #64748b; border: 1px solid #1e293b; 
-            font-size: 16px; font-weight: 800; padding: 15px 30px; border-radius: 16px; 
-            margin-top: 25px; align-self: flex-end; box-shadow: 0 6px 0 #020617;
-        }
-        .btn-restart:hover { background: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 6px 0 #991b1b; }
+        .btn-restart { background: #0f172a; color: #64748b; border: 1px solid #1e293b; font-size: 16px; font-weight: 800; padding: 15px 30px; border-radius: 16px; margin-top: 25px; align-self: flex-end; box-shadow: 0 6px 0 #020617; }
     </style>
 </head>
 <body>
-
 <canvas id="snow-canvas"></canvas>
-
 <div class="main-wrapper">
     <header><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/logos/fh-frosthaven-logo.png" class="logo"></header>
-
     <div id="setup-area">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid var(--border); padding-bottom:20px;">
             <span style="font-size:24px; font-weight:900; color:var(--accent);">노획물 목록</span>
-            <button onclick="resetAllToZero()" style="background:#0f172a; color:#94a3b8; border:1px solid #1e293b; padding:12px 25px; border-radius:14px; cursor:pointer; font-weight:800;">노획물 초기화</button>
+            <button onclick="resetAllToZero()" style="background:#0f172a; color:#94a3b8; border:1px solid #1e293b; padding:12px 25px; border-radius:14px; cursor:pointer; font-weight:800;">전체 리셋</button>
         </div>
         <div class="setup-grid" id="setup-inputs"></div>
         <button class="btn btn-draw" onclick="startGame()">게임 시작 (START)</button>
     </div>
-
     <div id="play-area">
-        <div class="display-panel">
-            <div class="loot-card" id="current-card"></div>
-            <p id="deck-info" style="font-weight:900; color:#64748b; margin:0; font-size:24px;">남은 카드: 0</p>
-            <div style="width:100%; max-width:500px;">
-                <button class="btn btn-draw" id="draw-btn" onclick="drawCard()">카드 드로우</button>
-                <div class="assign-grid" id="assign-area">
-                    <button class="btn btn-name" onclick="assignTo('김명흠')">명흠</button>
-                    <button class="btn btn-name" onclick="assignTo('배현우')">현우</button>
-                    <button class="btn btn-name" onclick="assignTo('정태영')">태영</button>
-                </div>
-            </div>
-        </div>
-
+        <div class="display-panel"><div class="loot-card" id="current-card"></div><p id="deck-info" style="font-weight:900; color:#64748b; margin:0; font-size:24px;">남은 카드: 0</p><div style="width:100%; max-width:500px;"><button class="btn btn-draw" id="draw-btn" onclick="drawCard()">카드 드로우</button><div class="assign-grid" id="assign-area"><button class="btn btn-name" onclick="assignTo('김명흠')">명흠</button><button class="btn btn-name" onclick="assignTo('배현우')">현우</button><button class="btn btn-name" onclick="assignTo('정태영')">태영</button></div></div></div>
         <div class="log-panel">
-            <div class="player-box">
-                <img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-geminate.png" class="hero-portrait">
-                <div class="name-row">
-                    <div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-geminate-bw-icon.png" class="hero-icon"></div>
-                    <span class="name-tag">김명흠</span>
-                </div>
-                <div id="log-김명흠" class="summary-container"></div>
-            </div>
-            <div class="player-box">
-                <img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-banner-spear.png" class="hero-portrait">
-                <div class="name-row">
-                    <div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-banner-spear-bw-icon.png" class="hero-icon"></div>
-                    <span class="name-tag">배현우</span>
-                </div>
-                <div id="log-배현우" class="summary-container"></div>
-            </div>
-            <div class="player-box">
-                <img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-frozen-fist.png" class="hero-portrait">
-                <div class="name-row">
-                    <div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-frozen-fist-bw-icon.png" class="hero-icon"></div>
-                    <span class="name-tag">정태영</span>
-                </div>
-                <div id="log-정태영" class="summary-container"></div>
-            </div>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-geminate.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-geminate-bw-icon.png" class="hero-icon"></div><span class="name-tag">김명흠</span></div><div id="log-김명흠" class="summary-container"></div></div>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-banner-spear.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-banner-spear-bw-icon.png" class="hero-icon"></div><span class="name-tag">배현우</span></div><div id="log-배현우" class="summary-container"></div></div>
+            <div class="player-box"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/characters/images/fh-frozen-fist.png" class="hero-portrait"><div class="name-row"><div class="hero-icon-wrapper"><img src="https://raw.githubusercontent.com/any2cards/worldhaven/master/images/art/frosthaven/icons/characters/fh-frozen-fist-bw-icon.png" class="hero-icon"></div><span class="name-tag">정태영</span></div><div id="log-정태영" class="summary-container"></div></div>
             <button class="btn btn-restart" onclick="location.reload()">다시 세팅하기 (Reset)</button>
         </div>
     </div>
 </div>
-
 <script>
-    const canvas = document.getElementById('snow-canvas');
-    const ctx = canvas.getContext('2d');
-    let flakes = [];
+    const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d'); let flakes = [];
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.onresize = resize; resize();
-    function createFlakes() { 
-        flakes = []; 
-        for(let i=0; i<180; i++) flakes.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*3+1, d: Math.random()*2+1, a: Math.random()*0.6+0.2 }); 
-    }
-    function drawFlakes() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath();
-        flakes.forEach(f => {
-            ctx.fillStyle = `rgba(255, 255, 255, ${f.a})`;
-            ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2, true);
-        });
-        ctx.fill(); moveFlakes();
-    }
-    function moveFlakes() {
-        flakes.forEach(f => { f.y += f.d; f.x += Math.sin(f.y/80)*2 + 1; if(f.y > canvas.height) { f.y = -20; f.x = Math.random()*canvas.width; } if(f.x > canvas.width) f.x = 0; });
-    }
+    function createFlakes() { flakes = []; for(let i=0; i<180; i++) flakes.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*3+1, d: Math.random()*2+1, a: Math.random()*0.6+0.2 }); }
+    function drawFlakes() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); flakes.forEach(f => { ctx.fillStyle = `rgba(255, 255, 255, ${f.a})`; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2, true); }); ctx.fill(); moveFlakes(); }
+    function moveFlakes() { flakes.forEach(f => { f.y += f.d; f.x += Math.sin(f.y/80)*2 + 1; if(f.y > canvas.height) { f.y = -20; f.x = Math.random()*canvas.width; } if(f.x > canvas.width) f.x = 0; }); }
     setInterval(drawFlakes, 30); createFlakes();
 
     let masterDeck = []; let currentResult = null;
@@ -210,43 +88,38 @@
         "h4": { label: "화염열매", icon: iconBase + "fh-flamefruit-bw-icon.png", p:"fh-flamefruit", s:1387, e:1388, max: 2 },
         "h5": { label: "바위뿌리", icon: iconBase + "fh-rockroot-bw-icon.png", p:"fh-rockroot", s:1389, e:1390, max: 2 },
         "h6": { label: "눈엉겅퀴", icon: iconBase + "fh-snowthistle-bw-icon.png", p:"fh-snowthistle", s:1391, e:1392, max: 2 },
-        "item": { label: "아이템", icon: iconBase + "fh-treasure-chest-item-bw-icon.png", p:"fh-random-item", s:1417, e:1417, max: 1 }
+        "item": { label: "아이템", icon: iconBase + "fh-treasure-chest-item-bw-icon.png", p:"fh-random-item", s:1417, e:1417, max: 1 },
+        "sc1": { label: "? (1)", icon: iconBase + "fh-money-bw-icon.png", img: "fh-scenario-coin-1418.png", isCheck: true },
+        "sc2": { label: "? (2)", icon: iconBase + "fh-money-bw-icon.png", img: "fh-scenario-coin-1419.png", isCheck: true }
     };
 
     function initInputs() {
         const setupInputs = document.getElementById('setup-inputs'); setupInputs.innerHTML = "";
         Object.keys(itemConfig).forEach(id => {
             const conf = itemConfig[id];
-            setupInputs.innerHTML += `
-                <div class="input-group">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div class="icon-wrapper"><img src="${conf.icon}" class="setup-icon"></div>
-                        <span style="font-weight:600; font-size:18px;">${conf.label}</span>
-                    </div>
-                    <input type="number" 
-                           id="in-${id}" 
-                           value="0" 
-                           min="0" 
-                           max="${conf.max}" 
-                           oninput="if(this.value > ${conf.max}) this.value = ${conf.max}; if(this.value < 0) this.value = 0;">
-                </div>`;
+            const iconHtml = conf.isCheck ? `<div class="icon-wrapper" style="background:transparent; border:1px dashed rgba(255,255,255,0.1);"></div>` : `<div class="icon-wrapper"><img src="${conf.icon}" class="setup-icon"></div>`;
+            let inputHtml = conf.isCheck ? `<input type="checkbox" id="in-${id}">` : `<input type="number" id="in-${id}" value="0" min="0" max="${conf.max}" oninput="if(this.value > ${conf.max}) this.value = ${conf.max}; if(this.value < 0) this.value = 0;">`;
+            setupInputs.innerHTML += `<div class="input-group"><div style="display:flex; align-items:center; gap:10px;">${iconHtml}<span style="font-weight:600; font-size:18px;">${conf.label}</span></div>${inputHtml}</div>`;
         });
     }
 
-    function resetAllToZero() { Object.keys(itemConfig).forEach(id => document.getElementById(`in-${id}`).value = 0); }
+    function resetAllToZero() { Object.keys(itemConfig).forEach(id => { const el = document.getElementById(`in-${id}`); if (itemConfig[id].isCheck) el.checked = false; else el.value = 0; }); }
     function shuffle(a) { for (let i=a.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [a[i], a[j]]=[a[j], a[i]]; } return a; }
 
     function startGame() {
         masterDeck = [];
         Object.keys(itemConfig).forEach(id => {
-            const conf = itemConfig[id];
-            let count = Math.min(parseInt(document.getElementById(`in-${id}`).value) || 0, conf.max);
-            if (id === 'money') {
-                let m = []; conf.sub.forEach(s => { for(let i=0; i<s.max; i++) m.push({type:'money', img: `${s.p}-${s.s+i}.png`, amount: s.v}); });
-                shuffle(m); for(let i=0; i<count; i++) masterDeck.push(m[i]);
-            } else {
-                let nums = []; for(let i=0; i<conf.max; i++) nums.push(conf.s+i);
-                shuffle(nums); for(let i=0; i<count; i++) { const n = nums[i]; let amt = 1; if (conf.x2 && (n-conf.s) < conf.x2) amt = 2; masterDeck.push({type:id, img:`${conf.p}-${n}.png`, amount:amt}); }
+            const conf = itemConfig[id]; const el = document.getElementById(`in-${id}`);
+            if (conf.isCheck) { if (el.checked) masterDeck.push({ type: id, img: conf.img, amount: 1 }); } 
+            else {
+                let count = Math.min(parseInt(el.value) || 0, conf.max);
+                if (id === 'money') {
+                    let m = []; conf.sub.forEach(s => { for(let i=0; i<s.max; i++) m.push({type:'money', img: `${s.p}-${s.s+i}.png`, amount: s.v}); });
+                    shuffle(m); for(let i=0; i<count; i++) masterDeck.push(m[i]);
+                } else {
+                    let nums = []; for(let i=0; i<conf.max; i++) nums.push(conf.s+i);
+                    shuffle(nums); for(let i=0; i<count; i++) { const n = nums[i]; let amt = 1; if (conf.x2 && (n-conf.s) < conf.x2) amt = 2; masterDeck.push({type:id, img:`${conf.p}-${n}.png`, amount:amt}); }
+                }
             }
         });
         shuffle(masterDeck); if (masterDeck.length === 0) return alert("카드를 추가하세요!");
